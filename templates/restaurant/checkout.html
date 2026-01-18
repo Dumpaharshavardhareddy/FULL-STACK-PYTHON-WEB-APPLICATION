@@ -1,0 +1,152 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4">
+            <h1 class="h3 mb-2">Checkout</h1>
+            <p class="text-muted mb-0">Enter your delivery details and choose a payment method.</p>
+        </div>
+
+        <form id="checkoutForm" class="row g-4" method="post" novalidate
+              data-payment-confirm-url="{% url 'restaurant:payment_confirm' %}">
+            {% csrf_token %}
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Delivery Details</h2>
+                        <div class="mb-3">
+                            <label for="checkoutName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="checkoutName" name="name" required>
+                            <div class="invalid-feedback">Please enter your name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checkoutEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="checkoutEmail" name="email" required>
+                            <div class="invalid-feedback">Please enter a valid email.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checkoutPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="checkoutPhone" name="phone" required>
+                            <div class="invalid-feedback">Please enter your phone number.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checkoutAddress" class="form-label">Address</label>
+                            <textarea class="form-control" id="checkoutAddress" name="address" rows="3" required></textarea>
+                            <div class="invalid-feedback">Please enter your delivery address.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="checkoutInstructions" class="form-label">Special Instructions</label>
+                            <textarea class="form-control" id="checkoutInstructions" name="instructions" rows="2"
+                                      placeholder="Optional"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Payment Method</h2>
+                        <div class="vstack gap-2">
+                            <div class="form-check border rounded-3 p-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                       id="paymentCod" value="COD" checked>
+                                <label class="form-check-label d-flex justify-content-between align-items-center"
+                                       for="paymentCod">
+                                    <span>Cash on Delivery</span>
+                                    <span class="badge bg-success">COD</span>
+                                </label>
+                            </div>
+                            <div class="form-check border rounded-3 p-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                       id="paymentPhonePe" value="PhonePe">
+                                <label class="form-check-label d-flex justify-content-between align-items-center"
+                                       for="paymentPhonePe">
+                                    <span>PhonePe</span>
+                                    <span class="badge bg-primary">Online</span>
+                                </label>
+                            </div>
+                            <div class="form-check border rounded-3 p-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                       id="paymentGPay" value="GPay">
+                                <label class="form-check-label d-flex justify-content-between align-items-center"
+                                       for="paymentGPay">
+                                    <span>Google Pay</span>
+                                    <span class="badge bg-primary">Online</span>
+                                </label>
+                            </div>
+                            <div class="form-check border rounded-3 p-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                       id="paymentPaytm" value="Paytm">
+                                <label class="form-check-label d-flex justify-content-between align-items-center"
+                                       for="paymentPaytm">
+                                    <span>Paytm</span>
+                                    <span class="badge bg-primary">Online</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <strong>₹{{ subtotal }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Delivery fee</span>
+                            <strong>₹{{ delivery_fee }}</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Total</span>
+                            <strong>₹{{ total }}</strong>
+                        </div>
+                        <button type="submit" class="btn btn-gradient w-100" id="checkoutSubmitButton">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var form = document.getElementById("checkoutForm");
+        var submitButton = document.getElementById("checkoutSubmitButton");
+        if (!form || !submitButton) {
+            return;
+        }
+
+        function getSelectedPaymentMethod() {
+            var inputs = document.querySelectorAll('input[name="paymentMethod"]');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].checked) {
+                    return inputs[i].value;
+                }
+            }
+            return "COD";
+        }
+
+        function updateButtonText() {
+            var method = getSelectedPaymentMethod();
+            if (method === "COD") {
+                submitButton.textContent = "Place Order";
+            } else {
+                submitButton.textContent = "Proceed to Payment";
+            }
+        }
+
+        document.querySelectorAll('input[name="paymentMethod"]').forEach(function (input) {
+            input.addEventListener("change", updateButtonText);
+        });
+
+        updateButtonText();
+    });
+</script>
+{% endblock %}
+

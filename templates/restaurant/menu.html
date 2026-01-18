@@ -1,0 +1,177 @@
+{% extends "restaurant/base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="py-5">
+  <div class="container">
+    <div class="mb-4">
+      <h1 class="h3 mb-2">Menu</h1>
+      <p class="text-muted mb-0">Browse our dishes, filter by category and add your favourites to the cart.</p>
+    </div>
+
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-md-6">
+        <div class="menu-search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="form-control menu-search-input" id="menuSearchInput" placeholder="Search dishes...">
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav nav-pills mb-4 menu-category-pills" id="menuCategoryTabs">
+      <li class="nav-item"><button class="nav-link active" type="button" data-category="All">All</button></li>
+      <li class="nav-item"><button class="nav-link" type="button" data-category="Starters">Starters</button></li>
+      <li class="nav-item"><button class="nav-link" type="button" data-category="Main Course">Main Course</button></li>
+      <li class="nav-item"><button class="nav-link" type="button" data-category="Beverages">Beverages</button></li>
+      <li class="nav-item"><button class="nav-link" type="button" data-category="Desserts">Desserts</button></li>
+    </ul>
+
+    <div class="row g-4"
+         id="menuItemsContainer"
+         data-cart-increase-url="{% url 'restaurant:cart_increase' %}">
+      {% for item in items %}
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 menu-item-card"
+             data-category="{{ item.category }}"
+             data-name="{{ item.name|lower }}"
+             data-description="{{ item.description|lower }}">
+          <div class="card h-100 shadow-sm">
+
+            <!-- ✅ FIXED IMAGE WRAP (NO ratio CLASS) -->
+            <div class="bg-light">
+              <img
+                src="{% if item.image %}{{ item.image.url }}{% elif item.image_url %}{{ item.image_url }}{% else %}https://via.placeholder.com/400x250?text=Food{% endif %}"
+                class="card-img-top menu-img"
+                alt="{{ item.name }}">
+            </div>
+
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="card-title mb-0">{{ item.name }}</h5>
+                {% if item.is_popular %}
+                  <span class="badge bg-danger">Popular</span>
+                {% endif %}
+              </div>
+
+              <div class="mb-2">
+                <span class="badge bg-secondary">{{ item.category }}</span>
+              </div>
+
+              <p class="card-text text-muted small mb-2">{{ item.description }}</p>
+
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">₹{{ item.price }}</span>
+                <span class="small text-warning">
+                  {% with rating=item.rating|default:0 %}
+                    {% for i in "12345" %}
+                      {% if forloop.counter <= rating|floatformat:0 %}
+                        <i class="fa-solid fa-star"></i>
+                      {% else %}
+                        <i class="fa-regular fa-star"></i>
+                      {% endif %}
+                    {% endfor %}
+                    <span class="text-muted ms-1">{{ rating }}</span>
+                  {% endwith %}
+                </span>
+              </div>
+
+              <button type="button"
+                      class="btn btn-gradient mt-auto w-100 menu-add-to-cart"
+                      data-id="{{ item.id }}">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12 text-center text-muted">
+          No items available.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+  <div id="menuAddToCartToast"
+       class="toast align-items-center text-bg-success border-0"
+       role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">Added to cart ✅</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto"
+              data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var itemsContainer = document.getElementById("menuItemsContainer");
+  var searchInput = document.getElementById("menuSearchInput");
+  var categoryTabs = document.getElementById("menuCategoryTabs");
+  if (!itemsContainer || !searchInput || !categoryTabs) return;
+
+  var currentCategory = "All";
+
+  function applyFilters() {
+    var term = searchInput.value.trim().toLowerCase();
+    var cards = itemsContainer.querySelectorAll(".menu-item-card");
+    cards.forEach(function (card) {
+      var category = card.getAttribute("data-category");
+      var text = (card.getAttribute("data-name") || "") + " " + (card.getAttribute("data-description") || "");
+      var matchesCategory = (currentCategory === "All") || (category === currentCategory);
+      var matchesSearch = !term || text.indexOf(term) !== -1;
+
+      if (matchesCategory && matchesSearch) {
+        card.classList.remove("d-none");
+      } else {
+        card.classList.add("d-none");
+      }
+    });
+  }
+
+  var buttons = itemsContainer.querySelectorAll(".menu-add-to-cart");
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var id = this.getAttribute("data-id");
+      var cartIncreaseUrl = itemsContainer.getAttribute("data-cart-increase-url");
+
+      if (cartIncreaseUrl && id) {
+        try {
+          fetch(cartIncreaseUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({ item_id: id })
+          }).then(function () {
+            if (typeof window.updateCartBadge === "function") window.updateCartBadge();
+          });
+        } catch (e) {}
+      }
+
+      var toastEl = document.getElementById("menuAddToCartToast");
+      if (toastEl && typeof bootstrap !== "undefined" && bootstrap.Toast) {
+        bootstrap.Toast.getOrCreateInstance(toastEl).show();
+      }
+    });
+  });
+
+  categoryTabs.addEventListener("click", function (event) {
+    var btn = event.target;
+    if (!btn || !btn.matches("button[data-category]")) return;
+
+    var tabButtons = categoryTabs.querySelectorAll("button[data-category]");
+    tabButtons.forEach(function (b) { b.classList.remove("active"); });
+    btn.classList.add("active");
+
+    currentCategory = btn.getAttribute("data-category") || "All";
+    applyFilters();
+  });
+
+  searchInput.addEventListener("input", applyFilters);
+
+  applyFilters();
+});
+</script>
+{% endblock %}

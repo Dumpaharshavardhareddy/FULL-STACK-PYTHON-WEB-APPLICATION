@@ -1,0 +1,107 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4 text-center">
+            <h1 class="h3 mb-2">Contact Us</h1>
+            <p class="text-muted mb-0">We would love to hear from you.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Send a Message</h2>
+                        <form id="contactForm" novalidate>
+                            <div class="mb-3">
+                                <label for="contactName" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="contactName" required>
+                                <div class="invalid-feedback">Please enter your name.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="contactEmail" required>
+                                <div class="invalid-feedback">Please enter a valid email.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactPhone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="contactPhone" required>
+                                <div class="invalid-feedback">Please enter your phone number.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactSubject" class="form-label">Subject</label>
+                                <input type="text" class="form-control" id="contactSubject" required>
+                                <div class="invalid-feedback">Please enter a subject.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactMessage" class="form-label">Message</label>
+                                <textarea class="form-control" id="contactMessage" rows="4" required></textarea>
+                                <div class="invalid-feedback">Please enter your message.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                            <div id="contactSuccess" class="alert alert-success mt-3 d-none" role="alert">
+                                Thank you for contacting us. We will get back to you soon.
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Contact Details</h2>
+                        <p class="mb-2">
+                            <i class="fa-solid fa-phone me-2 text-primary"></i>
+                            <strong>Phone:</strong> +91 73967 68478
+                        </p>
+                        <p class="mb-2">
+                            <i class="fa-solid fa-envelope me-2 text-primary"></i>
+                            <strong>Email:</strong> support@aarestaurant.com
+                        </p>
+                        <p class="mb-0">
+                            <i class="fa-solid fa-location-dot me-2 text-primary"></i>
+                            <strong>Address:</strong> 123 Food Street, Flavor City
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h2 class="h6 mb-3">Chat with us on WhatsApp</h2>
+                        <a href="https://wa.me/917396768478?text=Hi%20A%20Aa%20Restaurant,%20I%20need%20support"
+                           class="btn btn-success" target="_blank" rel="noopener">
+                            <i class="fa-brands fa-whatsapp me-2"></i>
+                            Start WhatsApp Chat
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var form = document.getElementById("contactForm");
+        var successAlert = document.getElementById("contactSuccess");
+        if (!form || !successAlert) {
+            return;
+        }
+
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
+            if (!form.checkValidity()) {
+                form.classList.add("was-validated");
+                return;
+            }
+
+            successAlert.classList.remove("d-none");
+            form.classList.remove("was-validated");
+            form.reset();
+        });
+    });
+</script>
+{% endblock %}
+
