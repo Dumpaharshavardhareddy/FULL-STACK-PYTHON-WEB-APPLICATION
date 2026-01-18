@@ -1,6 +1,5 @@
 # FULL-STACK-PYTHON-WEB-APPLICATION
-```text
-PROJECT_DOCUMENTATION_A_Aa_Restaurant
+
 ====================================
 
 Online Food Ordering System – Django 5
