@@ -1,0 +1,107 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-1">Order {{ order.order_id }}</h1>
+                {% if order.created_at %}
+                    <p class="text-muted mb-0">Placed on {{ order.created_at }}</p>
+                {% endif %}
+            </div>
+            <div class="text-end">
+                <span class="order-status-badge {% if order.status == 'Delivered' %}bg-success{% elif order.status == 'Preparing' %}bg-warning text-dark{% else %}bg-secondary{% endif %} me-1">
+                    {{ order.status }}
+                </span>
+                <span class="order-status-badge {% if order.payment_status == 'COD' %}bg-success{% else %}bg-info{% endif %}">
+                    {{ order.payment_status }}
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Items</h2>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Category</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for item in order.items %}
+                                    <tr>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.category|default:"-" }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-end">₹{{ item.price }}</td>
+                                        <td class="text-end">₹{{ item.line_total }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">
+                                            No items found for this order.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-3">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Customer</h2>
+                        <p class="mb-1"><strong>{{ order.customer.name }}</strong></p>
+                        <p class="mb-1">{{ order.customer.email }}</p>
+                        <p class="mb-3">{{ order.customer.phone }}</p>
+                        <p class="mb-0 small text-muted">{{ order.customer.address }}</p>
+                        {% if order.customer.instructions %}
+                            <p class="mt-2 mb-0 small"><strong>Instructions:</strong> {{ order.customer.instructions }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Payment</h2>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal</span>
+                            <strong>₹{{ order.subtotal }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Delivery fee</span>
+                            <strong>₹{{ order.delivery_fee }}</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Total</span>
+                            <strong>₹{{ order.total }}</strong>
+                        </div>
+                        <p class="mb-0 small text-muted">
+                            Payment method: {{ order.payment_method }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <a href="{% url 'restaurant:orders' %}" class="btn btn-outline-secondary">
+                Back to Orders
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

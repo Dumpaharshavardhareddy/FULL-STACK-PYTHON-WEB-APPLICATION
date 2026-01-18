@@ -1,0 +1,55 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="auth-page-wrapper min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-8 text-center">
+                <h1 class="h3 mb-2">Choose Login Type</h1>
+                <p class="text-muted mb-0">
+                    Please select how you want to sign in to A Aa Restaurant.
+                </p>
+            </div>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <a href="{% url 'restaurant:customer_login' %}" class="text-decoration-none">
+                    <div class="card auth-card auth-card-glass shadow-lg border-0 h-100">
+                        <div class="card-body p-4 p-md-5 d-flex flex-column align-items-center text-center">
+                            <div class="auth-avatar mb-3">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <h2 class="h4 mb-2">Customer Login</h2>
+                            <p class="text-muted mb-3">
+                                Login as a customer to browse the menu and place your orders.
+                            </p>
+                            <button type="button" class="btn btn-gradient auth-btn-shine px-4">
+                                Continue as Customer
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-5">
+                <a href="{% url 'restaurant:admin_login' %}" class="text-decoration-none">
+                    <div class="card auth-card auth-card-glass shadow-lg border-0 h-100">
+                        <div class="card-body p-4 p-md-5 d-flex flex-column align-items-center text-center">
+                            <div class="auth-avatar mb-3">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <h2 class="h4 mb-2">Admin Login</h2>
+                            <p class="text-muted mb-3">
+                                Staff only. Access order management and the admin dashboard.
+                            </p>
+                            <button type="button" class="btn btn-outline-dark px-4">
+                                Continue as Admin
+                            </button>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

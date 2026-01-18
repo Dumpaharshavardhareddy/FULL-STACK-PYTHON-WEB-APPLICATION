@@ -1,0 +1,102 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="auth-page-wrapper min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="card auth-card auth-card-glass shadow-lg border-0">
+                    <div class="card-body p-4 p-md-5">
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} mb-3" role="alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        <div class="text-center mb-4">
+                            <div class="auth-avatar mb-3">
+                                <i class="fa-solid fa-user-plus"></i>
+                            </div>
+                            <h1 class="h4 mb-1">Create Account</h1>
+                            <p class="text-muted mb-0">Sign up to start ordering your favorite food</p>
+                        </div>
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3 auth-input-group">
+                                <span class="auth-input-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control form-control-lg"
+                                       name="username"
+                                       placeholder="Full name or username"
+                                       required>
+                            </div>
+                            <div class="mb-3 auth-input-group">
+                                <span class="auth-input-icon">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </span>
+                                <input type="email"
+                                       class="form-control form-control-lg"
+                                       name="email"
+                                       placeholder="Email address"
+                                       required>
+                            </div>
+                            <div class="mb-2 auth-input-group">
+                                <span class="auth-input-icon">
+                                    <i class="fa-solid fa-lock"></i>
+                                </span>
+                                <input type="password"
+                                       class="form-control form-control-lg"
+                                       id="signupPassword"
+                                       name="password"
+                                       placeholder="Password"
+                                       required>
+                                <button type="button" class="auth-password-toggle" id="toggleSignupPassword">
+                                    <i class="fa-solid fa-eye-slash"></i>
+                                </button>
+                            </div>
+                            <div class="small text-muted mb-3">
+                                <i class="fa-solid fa-circle-info me-1"></i>
+                                Use at least 8 characters with letters and numbers.
+                            </div>
+                            <button type="submit" class="btn btn-gradient w-100 btn-lg auth-btn-shine">
+                                Sign Up
+                            </button>
+                            <div class="text-center mt-4">
+                                <p class="text-muted small mb-1">
+                                    Already have account?
+                                    <a href="/login/" class="auth-link-primary text-decoration-none">
+                                        Login
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+(function () {
+    var toggle = document.getElementById("toggleSignupPassword");
+    var input = document.getElementById("signupPassword");
+    if (!toggle || !input) return;
+    toggle.addEventListener("click", function () {
+        var type = input.getAttribute("type") === "password" ? "text" : "password";
+        input.setAttribute("type", type);
+        var icon = toggle.querySelector("i");
+        if (!icon) return;
+        if (type === "password") {
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    });
+})();
+</script>
+{% endblock %}

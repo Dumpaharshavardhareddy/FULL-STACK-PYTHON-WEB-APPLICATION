@@ -1,0 +1,19 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container text-center">
+        <h1 class="h4 mb-3">Order not found</h1>
+        <p class="text-muted mb-4">
+            The order with ID <strong>{{ order_id }}</strong> could not be found.
+        </p>
+        <a href="{% url 'restaurant:orders' %}" class="btn btn-outline-secondary me-2">
+            View all orders
+        </a>
+        <a href="/menu/" class="btn btn-primary">
+            Browse menu
+        </a>
+    </div>
+</section>
+{% endblock %}
+

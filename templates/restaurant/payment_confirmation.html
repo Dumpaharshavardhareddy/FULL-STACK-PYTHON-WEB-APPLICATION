@@ -1,0 +1,71 @@
+{% extends "restaurant/base.html" %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4">
+            <h1 class="h3 mb-2">Payment Confirmation</h1>
+            <p class="text-muted mb-0">Confirm your online payment to continue.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Information</h2>
+                        <p class="mb-1">
+                            You selected an online payment method on the checkout page.
+                        </p>
+                        <p class="mb-1">
+                            After clicking <strong>Pay Now</strong>, an OTP will be generated for demo purposes
+                            and you will be redirected to the OTP verification page.
+                        </p>
+                        <p class="mb-0 text-muted small">
+                            This is a demo payment screen. No real payment is processed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h5 mb-3">Pay Now</h2>
+                        <button type="button" class="btn btn-primary w-100 pay-button">
+                            Pay Now
+                        </button>
+                        <p class="text-muted small mb-0 mt-2">
+                            You will be taken to the OTP verification page to complete the payment.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function generateOtp() {
+            var otp = Math.floor(100000 + Math.random() * 900000).toString();
+            localStorage.setItem("aaPaymentOTP", otp);
+            if (typeof console !== "undefined" && console.log) {
+                console.log("Payment OTP:", otp);
+            }
+        }
+
+        function startPayment() {
+            generateOtp();
+            window.location.href = "/otp/verify/";
+        }
+
+        var button = document.querySelector(".pay-button");
+        if (button) {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                startPayment();
+            });
+        }
+    });
+</script>
+{% endblock %}
