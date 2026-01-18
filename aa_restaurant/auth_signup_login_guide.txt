@@ -1,0 +1,316 @@
+AUTH / SIGNUP / LOGIN – COMPLETE GUIDE
+=====================================
+
+Project: A Aa Restaurant (Django)
+
+This text explains:
+- How customer signup works
+- How customer and admin login work
+- Which URLs to use
+- How to debug users in Django shell
+- How to run server and test everything
+
+
+1) MAIN AUTH URLS
+-----------------
+
+App name: restaurant
+
+Customer signup:
+- URL path: /signup/
+- URL name: restaurant:signup
+
+Customer login:
+- URL path: /login/
+- URL name: restaurant:customer_login
+
+Admin login:
+- URL path: /admin-login/
+- URL name: restaurant:admin_login
+
+Login options (choose customer or admin):
+- URL path: /login-options/
+- URL name: restaurant:choose_login
+
+
+2) CUSTOMER SIGNUP FLOW
+-----------------------
+
+View: restaurant.views.signup
+Template: templates/restaurant/signup.html
+
+Fields in form (in HTML):
+- name="username"   (Full name or username)
+- name="email"
+- name="password"
+
+What the view does when you submit the form (POST):
+1) Reads username, email, password from request.POST
+2) Strips spaces around username and email
+3) Validates: all fields required
+   - If any field is empty -> show error message using Django messages
+   - Redirect back to signup page
+4) Checks if username already exists:
+   - If yes -> messages.error "Username already exists. Please choose another."
+   - Redirect back to signup page
+5) Checks if email already exists:
+   - If yes -> messages.error "Email already registered. Please login."
+   - Redirect to customer login page
+6) If all good:
+   - Creates a real Django User using:
+     User.objects.create_user(username=username, email=email, password=password)
+   - Sets user.is_staff = False and user.is_superuser = False
+   - Saves the user
+   - Adds success message: "Account created successfully. Please login."
+   - Redirects to customer login page (/login/)
+7) If request method is GET:
+   - Just renders signup.html
+
+
+3) CUSTOMER LOGIN FLOW
+----------------------
+
+View: restaurant.views.customer_login
+Template: templates/restaurant/customer_login.html
+
+HTML form fields:
+- name="username"
+- name="password"
+
+Important:
+- Login expects a USERNAME, not an email.
+- Whatever is stored as User.username must be typed in the Username box.
+
+What the view does:
+1) On GET:
+   - Renders customer_login.html with an optional error message
+2) On POST (form submit):
+   - Reads username and password from request.POST
+   - Calls authenticate(request, username=username, password=password)
+   - If authenticate returns a valid, active user:
+     - Calls login(request, user)
+     - Redirects to menu page (restaurant:menu -> /menu/)
+   - If authenticate returns None:
+     - Sets error = "Invalid username or password."
+     - Renders login page again with error shown in red alert
+
+Common mistake:
+- Trying to log in with the email address in the username field.
+  Example:
+    In database: username="harsha", email="harsha@gmail.com"
+    Correct login: username="harsha"
+    Wrong login:   username="harsha@gmail.com"
+
+
+4) ADMIN LOGIN FLOW
+-------------------
+
+View: restaurant.views.admin_login
+Template: templates/restaurant/admin_login.html
+
+Form fields:
+- name="username"
+- name="password"
+
+What the view does:
+1) Reads username and password
+2) Calls authenticate(request, username=username, password=password)
+3) If a user is returned and is active:
+   - If user.is_staff is True:
+     - Logs in user
+     - Redirects to admin dashboard (restaurant:admin_dashboard)
+   - If user.is_staff is False:
+     - Shows error: "You do not have permission to access the admin dashboard."
+4) If authenticate returns None:
+   - Shows error: "Invalid username or password."
+
+Note:
+- Admin login is separate from the Django /admin/ site.
+- It uses the same User table, but requires is_staff=True.
+
+
+5) LOGIN OPTIONS PAGE
+---------------------
+
+View: restaurant.views.choose_login
+Template: templates/restaurant/choose_login.html
+URL: /login-options/
+
+This page shows two cards:
+- Customer Login (links to /login/)
+- Admin Login (links to /admin-login/)
+
+Navbar:
+- "Login" button goes to /login-options/
+- "Sign Up" button goes to /signup/
+
+
+6) UI / DESIGN NOTES
+--------------------
+
+All auth pages share the same modern UI:
+- Base template: templates/restaurant/base.html
+- Shared CSS: static/css/styles.css
+
+Important classes in styles.css:
+- .auth-page-wrapper
+- .auth-card
+- .auth-card-glass
+- .auth-avatar
+- .auth-input-group
+- .auth-password-toggle
+- .btn-gradient
+- .auth-btn-shine
+- .auth-link-primary
+
+Templates using this auth design:
+- templates/restaurant/customer_login.html
+- templates/restaurant/signup.html
+- templates/restaurant/choose_login.html
+
+
+7) DJANGO MESSAGES (ALERTS)
+---------------------------
+
+Signup and login pages use Django messages to show alerts.
+
+On signup:
+- Error examples:
+  - "All fields are required."
+  - "Username already exists. Please choose another."
+  - "Email already registered. Please login."
+- Success:
+  - "Account created successfully. Please login."
+
+On customer login:
+- Error:
+  - "Invalid username or password."
+
+Messages appear as Bootstrap alerts at the top of the card.
+
+
+8) DJANGO SHELL – HOW TO INSPECT USERS
+--------------------------------------
+
+Always run these commands in PowerShell (project root):
+
+1) Open Django shell:
+   python manage.py shell
+
+   After this you will see ">>>", which is Python prompt.
+   Inside this shell DO NOT type "python manage.py shell" again.
+
+2) List all users (ID, username, email, is_staff)
+
+   from django.contrib.auth.models import User
+
+   for u in User.objects.all():
+       print(u.id, u.username, u.email, "is_staff=" + str(u.is_staff))
+
+   Important:
+   - After typing the for loop and print line, press ENTER on a blank line
+     so Python executes the loop and prints all users.
+
+   You will see lines like:
+   1 admin admin@example.com is_staff=True
+   2 harsha harsha@gmail.com is_staff=False
+
+3) Check one user and verify password
+
+   from django.contrib.auth.models import User
+
+   u = User.objects.filter(username='harsha').first()
+   print(u)
+   if u:
+       print("email:", u.email)
+       print("is_staff:", u.is_staff)
+       print("check_password:", u.check_password('ThePassword123'))
+
+   If check_password is True:
+   - The password 'ThePassword123' is correct for that user.
+
+   If check_password is False:
+   - The password you are trying is not the one stored in database.
+
+4) Create a test user safely
+
+   from django.contrib.auth.models import User
+
+   User.objects.create_user('testuser1', 'testuser1@example.com', 'Testpass123')
+   print("created ->", User.objects.get(username='testuser1').username)
+
+   Then test login on website:
+   - Username: testuser1
+   - Password: Testpass123
+
+
+9) COMMON LOGIN PROBLEMS AND FIXES
+----------------------------------
+
+Problem 1:
+- "Signup worked but customer login fails"
+
+Checklist:
+1) Make sure the login form uses:
+   - name="username"
+   - name="password"
+2) Make sure you are typing the exact username (not email).
+3) In Django shell, run check_password for that username and password.
+
+Problem 2:
+- You accidentally created users with plain-text password (not using create_user)
+
+Fix:
+- Always use User.objects.create_user(...) in signup view
+  (already done in current code).
+- If an old user was created incorrectly, recreate user using create_user
+  or set password using u.set_password("newpass"); u.save().
+
+
+10) HOW TO RUN SERVER AND TEST
+------------------------------
+
+From project root (contains manage.py):
+
+1) (Optional) Apply migrations if you change models:
+   python manage.py migrate
+
+   For current auth setup, migrations are already done.
+
+2) Run development server:
+   python manage.py runserver
+
+3) Open browser and test:
+
+   a) Go to home:
+      http://127.0.0.1:8000/
+
+   b) Click "Sign Up" in navbar:
+      - Fill username, email, password
+      - Submit
+      - You should see a success message and be redirected to /login/
+
+   c) On /login/, enter the same username and password:
+      - On success, you are redirected to /menu/
+
+   d) Test admin login:
+      http://127.0.0.1:8000/login-options/
+      - Click "Admin Login"
+      - Use a user that has is_staff=True
+      - On success, you go to admin dashboard.
+
+
+11) SUMMARY
+-----------
+
+- Signup creates real Django User records using User.objects.create_user.
+- Customer login uses username + password (not email).
+- Admin login also uses username + password, but requires is_staff=True.
+- Login options page lets you choose between customer and admin login.
+- All auth pages share the same modern Bootstrap + glassmorphism design.
+- Use Django shell to:
+  - See all users
+  - Check usernames and emails
+  - Verify passwords
+  - Create test users
+
